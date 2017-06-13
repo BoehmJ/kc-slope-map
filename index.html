@@ -1,0 +1,55 @@
+<!DOCTYPE html>
+<html>
+  <head>
+    <title>KCMO Street Centerline Slopes</title>
+    <link rel="stylesheet" href="https://unpkg.com/leaflet@1.0.3/dist/leaflet.css"
+      integrity="sha512-07I2e+7D8p6he1SIM+1twR5TIrhUQn9+I6yjqD53JQjFiMf8EtC93ty0/5vJTZGF8aAocvHYNEDJajGdNx1IsQ=="
+      crossorigin=""/>
+      <script src="https://unpkg.com/leaflet@1.0.3/dist/leaflet.js"
+      integrity="sha512-A7vV8IFfih/D732iSSKi20u/ooOfj/AGehOKq0f4vLT1Zr2Y+RX7C+w8A1gaSasGtRUZpF/NZgzSAu4/Gc41Lg=="
+      crossorigin=""></script>
+      <style>
+        #map{ height: 500px };
+        .legend {
+            line-height: 18px;
+            color: #555;
+        };
+        .legend i {
+            width: 18px;
+            height: 18px;
+            float: left;
+            margin-right: 8px;
+            opacity: 0.7;
+        }
+
+      </style>
+  </head>
+  <body>
+     <div id="map"></div>
+     <script type="text/javascript" src="streetCenterlines.js"></script>
+     <script>
+        var mymap = L.map('map').setView([39.09, -94.559], 13);
+        L.tileLayer('https://api.mapbox.com/styles/v1/mapbox/light-v9/tiles/256/{z}/{x}/{y}?access_token=pk.eyJ1Ijoiam9zaGJvZWhtIiwiYSI6IlZhQkRRR1kifQ.LO0Nm1RdFnf7pSg9Rr-YKA', {
+            attribution: 'Map data &copy; <a href="http://openstreetmap.org">OpenStreetMap</a> contributors, <a href="http://creativecommons.org/licenses/by-sa/2.0/">CC-BY-SA</a>, Imagery © <a href="http://mapbox.com">Mapbox</a> <br> Elevation Data and Street Centerline Files by <a href="http://maps.kcmo.org/apps/parcelviewer/">KCMO</a>',
+            maxZoom: 16,
+            accessToken: 'pk.eyJ1Ijoiam9zaGJvZWhtIiwiYSI6IlZhQkRRR1kifQ.LO0Nm1RdFnf7pSg9Rr-YKA'
+        }).addTo(mymap);
+        function getColor(s) {
+            return s > 15 ? '#ff3333' :
+                   s > 5  ? '#ff6633' :
+                   s > 2  ? '#ffcc00' :
+                   s > 1  ? '#99cc33' :
+                   s > 0  ? '#006633' :
+                              '#006633';
+        };
+        function style(feature) {
+            return {
+                color: getColor(feature.properties.slope),
+                weight: 1,
+                opacity: 1,
+            };
+        }
+        var geoJson = L.geoJson(streetCenterlines, {style: style}).addTo(mymap);
+     </script>
+  </body>
+</html>
