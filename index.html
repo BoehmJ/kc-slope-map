@@ -9,11 +9,23 @@
       integrity="sha512-A7vV8IFfih/D732iSSKi20u/ooOfj/AGehOKq0f4vLT1Zr2Y+RX7C+w8A1gaSasGtRUZpF/NZgzSAu4/Gc41Lg=="
       crossorigin=""></script>
       <style>
-        #map{ height: 500px };
+        #map{ height: 500px }
+        .info {
+            padding: 6px 8px;
+            font: 14px/16px Arial, Helvetica, sans-serif;
+            background: white;
+            background: rgba(255,255,255,0.8);
+            box-shadow: 0 0 15px rgba(0,0,0,0.2);
+            border-radius: 5px;
+        }
+        .info h4 {
+            margin: 0 0 5px;
+            color: #777;
+        }
         .legend {
             line-height: 18px;
             color: #555;
-        };
+        }
         .legend i {
             width: 18px;
             height: 18px;
@@ -28,12 +40,28 @@
      <div id="map"></div>
      <script type="text/javascript" src="streetCenterlines.js"></script>
      <script>
-        var mymap = L.map('map').setView([39.09, -94.559], 13);
-        L.tileLayer('https://api.mapbox.com/styles/v1/mapbox/light-v9/tiles/256/{z}/{x}/{y}?access_token=pk.eyJ1Ijoiam9zaGJvZWhtIiwiYSI6IlZhQkRRR1kifQ.LO0Nm1RdFnf7pSg9Rr-YKA', {
+        var mymap = L.map('map').setView([39.09, -94.559], 14);
+        L.tileLayer('https://api.mapbox.com/styles/v1/mapbox/dark-v9/tiles/256/{z}/{x}/{y}?access_token=pk.eyJ1Ijoiam9zaGJvZWhtIiwiYSI6IlZhQkRRR1kifQ.LO0Nm1RdFnf7pSg9Rr-YKA', {
             attribution: 'Map data &copy; <a href="http://openstreetmap.org">OpenStreetMap</a> contributors, <a href="http://creativecommons.org/licenses/by-sa/2.0/">CC-BY-SA</a>, Imagery © <a href="http://mapbox.com">Mapbox</a> <br> Elevation Data and Street Centerline Files by <a href="http://maps.kcmo.org/apps/parcelviewer/">KCMO</a>',
             maxZoom: 16,
             accessToken: 'pk.eyJ1Ijoiam9zaGJvZWhtIiwiYSI6IlZhQkRRR1kifQ.LO0Nm1RdFnf7pSg9Rr-YKA'
         }).addTo(mymap);
+/*        var info = L.control();
+
+        info.onAdd = function (map) {
+            this._div = L.DomUtil.create('div', 'info'); // create a div with a class "info"
+            this.update();
+            return this._div;
+        };
+
+        // method that we will use to update the control based on feature properties passed
+        info.update = function (props) {
+            this._div.innerHTML = '<h4>Percent Slope:</h4>' +  (props ?
+                + feature.properties.slope + ' %'
+                : 'Hover over a street segment');
+        }
+
+        info.addTo(mymap); */
         function getColor(s) {
             return s > 15 ? '#ff3333' :
                    s > 5  ? '#ff6633' :
@@ -41,15 +69,54 @@
                    s > 1  ? '#99cc33' :
                    s > 0  ? '#006633' :
                               '#006633';
-        };
+        }
         function style(feature) {
             return {
                 color: getColor(feature.properties.slope),
-                weight: 1,
-                opacity: 1,
+                weight: 1.5,
+                opacity: .6,
             };
         }
+        function highlightFeature(e) {
+            var layer = e.target;
+
+            layer.setStyle({
+                weight: 4,
+                color: '#666',
+                dashArray: '',
+                fillOpacity: 0.7
+            });
+
+            if (!L.Browser.ie && !L.Browser.opera && !L.Browser.edge) {
+                layer.bringToFront();
+            }
+        };
+
+        function resetHighlight(e) {
+            geojson.resetStyle(e.target);
+        };
         var geoJson = L.geoJson(streetCenterlines, {style: style}).addTo(mymap);
+
+
+        var legend = L.control({position: 'bottomright'});
+
+        legend.onAdd = function (map) {
+
+            var div = L.DomUtil.create('div', 'info legend'),
+                grades = [0, 1, 2, 5, 15],
+                labels = ['%'];
+
+            // loop through our density intervals and generate a label with a colored square for each interval
+            for (var i = 0; i < grades.length; i++) {
+                div.innerHTML +=
+                    '<i style="background:' + getColor(grades[i] + 1) + '"></i> ' +
+                    grades[i] + (grades[i + 1] ? '&ndash;' + grades[i + 1] + '<br>' : '+');
+            }
+
+            return div;
+        };
+
+        legend.addTo(mymap);
      </script>
   </body>
 </html>
